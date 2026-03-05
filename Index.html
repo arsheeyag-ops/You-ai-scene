@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Co‑Write a Scene with AI!</title>
+  <!-- Responsive for phones / QR use -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #05070d;
+      --card: #10131f;
+      --accent: #f5b53c;
+      --accent-soft: rgba(245, 181, 60, 0.14);
+      --human: #7be0ff;
+      --ai: #f58fff;
+      --muted: #9aa0c2;
+      --text: #f7f7ff;
+      --border: #24263b;
+      --danger: #ff6b81;
+      --mono: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+              "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--mono);
+      background: radial-gradient(circle at top, #151a2c, #04050a 55%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+    }
+
+    h1, h2, h3 {
+      font-weight: 650;
+      letter-spacing: 0.03em;
+    }
+
+    h1 {
+      font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      border: 1px solid rgba(245,181,60,0.45);
+      color: var(--accent);
+      background: linear-gradient(
+        135deg,
+        rgba(245,181,60,0.14),
+        transparent
+      );
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.6fr);
+      gap: 1.4rem;
+    }
+
+    @media (max-width: 960px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, #171b32, #090b13 55%);
+      border-radius: 1rem;
+      border: 1px solid var(--border);
+      padding: 1.1rem 1.1rem 1rem;
+      box-shadow: 0 18px 35px rgba(0, 0, 0, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.75rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .card-subtitle {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(154,160,194,0.5);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      padding: 0.12rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(15, 185, 129, 0.13);
+      color: #7de4b4;
+      border: 1px solid rgba(84, 230, 175, 0.45);
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .fieldset {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .fieldset label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+
+    .fieldset small {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .options-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .option-chip {
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(72, 81, 132, 0.9);
+      background: rgba(9, 12, 32, 0.8);
+      color: var(--text);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: 0.15s border, 0.15s background, 0.15s transform;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      user-select: none;
+    }
+
+    .option-chip span.dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(154, 160, 194, 0.7);
+    }
+
+    .option-chip[data-group="tone"] span.dot {
+      background: var(--accent);
+    }
+
+    .option-chip[data-group="character1"] span.dot {
+      background: #7de4b4;
+    }
+
+    .option-chip[data-group="character2"] span.dot {
+      background: #ffbddd;
+    }
+
+    .option-chip.selected {
+      border-color: var(--accent);
+      background: rgba(245, 181, 60, 0.14);
+      transform: translateY(-1px);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 64px;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      background: rgba(7, 9, 19, 0.96);
+      color: var(--text);
+      font-size: 0.9rem;
+      padding: 0.65rem 0.7rem;
+      resize: vertical;
+      outline: none;
+      line-height: 1.4;
+    }
+
+    textarea::placeholder {
+      color: rgba(154, 160, 194, 0.7);
+    }
+
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(245,181,60,0.35);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.35rem;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg,#f5b53c,#ff7aa2);
+      color: #120915;
+      font-weight: 600;
+      padding: 0.55rem 1.1rem;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      box-shadow: 0 14px 26px rgba(0,0,0,0.45);
+      transition: transform 0.14s, box-shadow 0.14s, filter 0.12s;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      box-shadow: 0 16px 32px rgba(0,0,0,0.55);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.45);
+    }
+
+    button.secondary {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid rgba(72, 81, 132, 0.9);
+      box-shadow: none;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #26d782;
+      box-shadow: 0 0 10px rgba(72, 255, 182, 0.9);
+    }
+
+    .status-label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .status-label span.code {
+      font-family: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.7rem;
+      color: rgba(201, 208, 255, 0.9);
+    }
+
+    /* Scene output */
+
+    .scene-output {
+      margin-top: 0.7rem;
+      border-radius: 0.85rem;
+      background: radial-gradient(circle at top left, #211933, #090a16 55%);
+      border: 1px solid rgba(93, 87, 137, 0.9);
+      padding: 0.7rem 0.75rem;
+      font-size: 0.86rem;
+      display: none;
+    }
+
+    .scene-output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.35rem;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+    }
+
+    .legend {
+      display: flex;
+      gap: 0.65rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+    }
+
+    .legend-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+    }
+
+    .legend-swatch.human {
+      background: var(--human);
+    }
+
+    .legend-swatch.ai {
+      background: var(--ai);
+    }
+
+    .scene-lines {
+      list-style: none;
+      margin-top: 0.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      max-height: 220px;
+      overflow-y: auto;
+      padding-right: 0.2rem;
+    }
+
+    .scene-lines li {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+
+    .scene-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: rgba(154,160,194,0.9);
+      min-width: 110px;
+    }
+
+    .scene-text {
+      flex: 1;
+    }
+
+    .scene-text span.human {
+      background: linear-gradient(90deg, rgba(123,224,255,0.22), transparent);
+      color: #c8f3ff;
+      border-bottom: 1px solid rgba(123,224,255,0.7);
+    }
+
+    .scene-text span.ai {
+      background: linear-gradient(90deg, rgba(245,143,255,0.22), transparent);
+      color: #ffd8ff;
+      border-bottom: 1px dashed rgba(245,143,255,0.75);
+    }
+
+    .meta-note {
+      margin-top: 0.3rem;
+      font-size: 0.72rem;
+      color: rgba(200, 206, 255, 0.8);
+      font-style: italic;
+    }
+
+    /* Live feed layout */
+
+    .feed-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+      gap: 0.9rem;
+      margin-top: 0.3rem;
+    }
+
+    @media (max-width: 960px) {
+      .feed-layout {
+        grid-template-columns: minmax(0,1fr);
+      }
+    }
+
+    .feed-container {
+      border-radius: 0.9rem;
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at top, #181b30, #05060e 55%);
+      padding: 0.7rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      position: relative;
+    }
+
+    .feed-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .fullscreen-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(72, 81, 132, 0.9);
+      background: rgba(9, 12, 32, 0.9);
+      color: var(--muted);
+      cursor: pointer;
+      transition: 0.12s;
+    }
+
+    .fullscreen-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .feed-stream {
+      flex: 1;
+      margin-top: 0.35rem;
+      border-radius: 0.7rem;
+      border: 1px solid rgba(59, 64, 110, 0.9);
+      background: rgba(6, 7, 18, 0.94);
+      padding: 0.35rem 0.5rem;
+      overflow: hidden;
+      position: relative;
+      font-size: 0.8rem;
+      min-height: 220px;
+      max-height: 360px;
+    }
+
+    .feed-scroll {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      padding-right: 0.3rem;
+      scroll-behavior: smooth;
+    }
+
+    .feed-item {
+      padding: 0.35rem 0.18rem;
+      border-bottom: 1px solid rgba(34, 38, 56, 0.75);
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+
+    .feed-item:last-child {
+      border-bottom: none;
+    }
+
+    .feed-item:hover {
+      background: rgba(36, 40, 74, 0.7);
+    }
+
+    .feed-line {
+      color: #e1e4ff;
+    }
+
+    .feed-line-preview {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .feed-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .feed-tag {
+      padding: 0.1rem 0.42rem;
+      border-radius: 999px;
+      border: 1px solid rgba(245,181,60,0.6);
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.65rem;
+    }
+
+    /* Full scene viewer */
+
+    .full-scene-card {
+      border-radius: 0.9rem;
+      border: 1px solid var(--border);
+      background: rgba(5, 6, 16, 0.98);
+      padding: 0.7rem 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      min-height: 220px;
+    }
+
+    .full-scene-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.78rem;
+      color: var(--muted);
+      gap: 0.3rem;
+    }
+
+    .full-scene-header span {
+      word-break: break-word;
+    }
+
+    .full-scene-lines {
+      list-style: none;
+      font-size: 0.83rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      margin-top: 0.3rem;
+    }
+
+    .full-scene-lines li strong {
+      color: rgba(232, 232, 255, 0.95);
+    }
+
+    .full-scene-lines li span.human {
+      background: linear-gradient(90deg, rgba(123,224,255,0.16), transparent);
+      border-bottom: 1px solid rgba(123,224,255,0.6);
+    }
+
+    .full-scene-lines li span.ai {
+      background: linear-gradient(90deg, rgba(245,143,255,0.17), transparent);
+      border-bottom: 1px dashed rgba(245,143,255,0.7);
+    }
+
+    .full-scene-empty {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="pill">
+      <span class="pill-dot"></span>
+      Lobby Experiment
+      <span style="opacity:0.7;">·</span>
+      Co‑Write a Scene with AI
+    </div>
+    <h1>
+      Co‑Write a Scene
+      <span style="
+        background: linear-gradient(135deg,#f5b53c,#ff7aa2);
+        -webkit-background-clip: text;
+        color: transparent;
+      ">with AI!</span>
+    </h1>
+  </header>
+
+  <section class="layout" aria-label="Creation and Live feed">
+    <!-- LEFT: Creation form -->
+    <article class="card" aria-label="Co-write a scene form">
+      <div class="card-header">
+        <div>
+          <div class="card-subtitle">
+            <span>QR station</span>
+            <span>·</span>
+            <span>Write a scene in ~60 seconds</span>
+          </div>
+          <h2>Co‑Write Dialogue with an AI Partner</h2>
+        </div>
+        <span class="badge">Audience input</span>
+      </div>
+
+      <p class="hint">
+        Pick a tone, sketch two characters, then give Character 1 a single starting line.
+        The AI responds as Character 2 and continues the back‑and‑forth for 4‑6 lines
+        of pure dialogue (no stage directions).
+      </p>
+
+      <form id="scene-form" autocomplete="off">
+        <!-- Tone -->
+        <div class="fieldset">
+          <label>1 · Choose a tone</label>
+          <div class="options-row" id="tone-options">
+            <button type="button" class="option-chip" data-group="tone" data-value="tender">
+              <span class="dot"></span> Tender
+            </button>
+            <button type="button" class="option-chip" data-group="tone" data-value="tense">
+              <span class="dot"></span> Tense
+            </button>
+            <button type="button" class="option-chip" data-group="tone" data-value="absurd">
+              <span class="dot"></span> Absurd
+            </button>
+            <button type="button" class="option-chip" data-group="tone" data-value="bittersweet">
+              <span class="dot"></span> Bittersweet
+            </button>
+          </div>
+        </div>
+
+        <!-- Character details -->
+        <div class="fieldset">
+          <label>2 · Choose two character details</label>
+          <small>
+            Character 1 = your voice. Character 2 = the AI’s voice. We’ll use these to
+            build the dialogue.
+          </small>
+          <div class="options-row" id="character1-options">
+            <button type="button" class="option-chip" data-group="character1" data-value="Stage manager who hides their panic">
+              <span class="dot"></span> Character 1: Stage manager who hides their panic
+            </button>
+            <button type="button" class="option-chip" data-group="character1" data-value="Usher who secretly loves chaos">
+              <span class="dot"></span> Character 1: Usher who secretly loves chaos
+            </button>
+            <button type="button" class="option-chip" data-group="character1" data-value="Chorus member missing their cue">
+              <span class="dot"></span> Character 1: Chorus member missing their cue
+            </button>
+            <button type="button" class="option-chip" data-group="character1" data-value="Director repeating opening night">
+              <span class="dot"></span> Character 1: Director repeating opening night
+            </button>
+          </div>
+
+          <div class="options-row" id="character2-options" style="margin-top:0.45rem;">
+            <button type="button" class="option-chip" data-group="character2" data-value="Lighting op who thinks the lights are alive">
+              <span class="dot"></span> Character 2: Lighting op who thinks the lights are alive
+            </button>
+            <button type="button" class="option-chip" data-group="character2" data-value="Usher convinced the show never ends">
+              <span class="dot"></span> Character 2: Usher convinced the show never ends
+            </button>
+            <button type="button" class="option-chip" data-group="character2" data-value="Chorus voice from the building itself">
+              <span class="dot"></span> Character 2: Chorus voice from the building itself
+            </button>
+            <button type="button" class="option-chip" data-group="character2" data-value="Audience member who already knows the ending">
+              <span class="dot"></span> Character 2: Audience member who already knows the ending
+            </button>
+          </div>
+        </div>
+
+        <!-- Human line -->
+        <div class="fieldset">
+          <label>3 · Give Character 1 one line</label>
+          <small>
+            Dialogue only, no stage directions. Example: “If we never close the doors, maybe this night can’t finish.”
+          </small>
+          <textarea
+            id="human-line"
+            name="humanLine"
+            maxlength="140"
+            placeholder="Type one line of dialogue for Character 1."
+            required
+          ></textarea>
+        </div>
+
+        <div class="button-row">
+          <button type="submit" id="generate-btn">
+            <span>Generate dialogue</span>
+            <span aria-hidden="true">⟶</span>
+          </button>
+          <button type="button" class="secondary" id="clear-btn">Clear</button>
+          <div class="status-label">
+            <span class="status-dot"></span>
+            Live feed:
+            <span class="code">ready</span>
+          </div>
+        </div>
+      </form>
+
+      <div class="scene-output" id="scene-output">
+        <div class="scene-output-header">
+          <span>Co‑Created Dialogue</span>
+          <div class="legend">
+            <div class="legend-item">
+              <span class="legend-swatch human"></span> Human (Character 1)
+            </div>
+            <div class="legend-item">
+              <span class="legend-swatch ai"></span> AI (Character 2)
+            </div>
+          </div>
+        </div>
+        <ul class="scene-lines" id="scene-lines"></ul>
+        <p class="meta-note" id="scene-meta">
+          Blue highlights lines seeded by you (Character 1). Magenta highlights lines
+          generated by the AI as either Character 1 or Character 2.
+        </p>
+      </div>
+    </article>
+
+    <!-- RIGHT: Live feed + full scene viewer -->
+    <aside class="card" aria-label="Live feed and scenes">
+      <div class="card-header">
+        <div>
+          <div class="card-subtitle">
+            <span>Live feed</span>
+            <span>·</span>
+            <span>Anonymous audience + AI scenes</span>
+          </div>
+          <h2>Scenes in Motion</h2>
+        </div>
+        <span class="tag">Tap a scene to view</span>
+      </div>
+
+      <p class="hint">
+        The feed shows anonymized dialogue between Character 1 (human‑seeded)
+        and Character 2 (AI‑generated). Tap on any cue line to see the full scene
+        for acting, annotating, or re‑staging.
+      </p>
+
+      <div class="feed-layout">
+        <!-- Live feed list -->
+        <div class="feed-container" id="feed-container">
+          <div class="feed-header-row">
+            <span class="status-label">
+              <span class="status-dot"></span>
+              Streaming new scenes
+            </span>
+            <button class="fullscreen-btn" id="fullscreen-btn">
+              ⤢ Fullscreen feed
+            </button>
+          </div>
+
+          <div class="feed-stream">
+            <div class="feed-scroll" id="feed-scroll">
+              <!-- JS adds feed items -->
+            </div>
+          </div>
+
+          <p class="hint" style="margin-top:0.35rem;">
+            Use fullscreen to project this feed onto a lobby screen. Tap or click
+            any entry to open its full dialogue on the right.
+          </p>
+        </div>
+
+        <!-- Full scene viewer -->
+        <div class="full-scene-card" aria-label="Full scene viewer">
+          <div class="full-scene-header">
+            <span id="full-scene-title">Select a scene from the feed</span>
+            <span class="badge" id="full-scene-meta">—</span>
+          </div>
+          <ul class="full-scene-lines" id="full-scene-lines"></ul>
+          <p class="full-scene-empty" id="full-scene-empty">
+            Click or tap any cue line in the live feed to see all 4–6 lines of that
+            scene, ready to read, perform, or annotate.
+          </p>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <script>
+    // Basic chip selection
+    function setupChipGroup(containerId, groupName) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.addEventListener("click", (event) => {
+        const chip = event.target.closest(".option-chip");
+        if (!chip) return;
+        const group = chip.dataset.group;
+        if (group !== groupName) return;
+        container
+          .querySelectorAll('.option-chip[data-group="' + groupName + '"]')
+          .forEach((c) => c.classList.remove("selected"));
+        chip.classList.add("selected");
+      });
+    }
+
+    setupChipGroup("tone-options", "tone");
+    setupChipGroup("character1-options", "character1");
+    setupChipGroup("character2-options", "character2");
+
+    const form = document.getElementById("scene-form");
+    const sceneOutput = document.getElementById("scene-output");
+    const sceneLinesEl = document.getElementById("scene-lines");
+    const generateBtn = document.getElementById("generate-btn");
+    const clearBtn = document.getElementById("clear-btn");
+    const humanLineInput = document.getElementById("human-line");
+
+    const feedScroll = document.getElementById("feed-scroll");
+    const feedContainer = document.getElementById("feed-container");
+    const fullscreenBtn = document.getElementById("fullscreen-btn");
+
+    const fullSceneTitle = document.getElementById("full-scene-title");
+    const fullSceneMeta = document.getElementById("full-scene-meta");
+    const fullSceneLines = document.getElementById("full-scene-lines");
+    const fullSceneEmpty = document.getElementById("full-scene-empty");
+
+    const scenes = [];
+
+    // Helper: truncate text for cue line / preview
+    function makeCue(text, maxWords = 6) {
+      const words = text.trim().split(/\s+/);
+      if (words.length <= maxWords) return text.trim();
+      return words.slice(0, maxWords).join(" ") + "…";
+    }
+
+    // Stub: generate AI dialogue lines.
+    // Replace with real API call later.
+    function generateAICompletion({ tone, character1Name, character2Name, humanLine }) {
+      // We generate 3–5 AI lines to reach total 4–6 lines.
+      // Alternate speakers C2, C1, C2, ...
+      const templates = {
+        tender: [
+          `${character2Name}: I’ve been watching you hold it together all night.`,
+          `${character1Name}: Someone has to keep the seams from showing.`,
+          `${character2Name}: Maybe the seams are the most honest part.`,
+          `${character1Name}: Honest doesn’t mean I want them to see it.`,
+          `${character2Name}: They already do. They’re just pretending for you.`
+        ],
+        tense: [
+          `${character2Name}: You think the audience can’t feel the crack in your voice?`,
+          `${character1Name}: They’re too busy pretending nothing’s wrong.`,
+          `${character2Name}: Or waiting for someone to finally say it is.`,
+          `${character1Name}: Don’t you dare say it before the blackout.`,
+          `${character2Name}: Then call it. I’m stuck in this light until you do.`
+        ],
+        absurd: [
+          `${character2Name}: The exit signs are improvising again.`,
+          `${character1Name}: Great. Even the lights get more rehearsal than we do.`,
+          `${character2Name}: At least they know which way to run.`,
+          `${character1Name}: I’m still waiting for my blocking from last season.`,
+          `${character2Name}: Maybe the script missed its cue and never came back.`
+        ],
+        bittersweet: [
+          `${character2Name}: You always stall right before the last cue.`,
+          `${character1Name}: It’s my way of stretching the goodbye.`,
+          `${character2Name}: Someday the goodbye will stretch without you.`,
+          `${character1Name}: Then tonight I’m allowed one more pause.`,
+          `${character2Name}: I’ll hold the house lights off as long as I can.`
+        ]
+      };
+
+      const base = templates[tone] || templates.tender;
+      // Randomly decide whether we return 3, 4, or 5 lines (for variety)
+      const maxExtra = Math.floor(Math.random() * 3) + 3; // 3,4,5
+      return base.slice(0, maxExtra);
+    }
+
+    function renderSceneLines(dialogue) {
+      sceneLinesEl.innerHTML = "";
+      dialogue.forEach((line) => {
+        const li = document.createElement("li");
+        const label = document.createElement("span");
+        label.className = "scene-label";
+        label.textContent = line.character;
+        const textSpan = document.createElement("span");
+        textSpan.className = "scene-text";
+        const inner = document.createElement("span");
+        inner.className = line.origin === "human" ? "human" : "ai";
+        inner.textContent = line.text;
+        textSpan.appendChild(inner);
+        li.appendChild(label);
+        li.appendChild(textSpan);
+        sceneLinesEl.appendChild(li);
+      });
+    }
+
+    function scrollFeedToBottom() {
+      if (!feedScroll) return;
+      feedScroll.scrollTop = feedScroll.scrollHeight;
+    }
+
+    function addSceneToFeed(scene) {
+      scenes.push(scene);
+
+      const item = document.createElement("div");
+      item.className = "feed-item";
+      item.dataset.sceneId = scene.id;
+
+      const firstLine = scene.dialogue[0];
+      const cue = firstLine ? makeCue(firstLine.text) : "New scene";
+
+      const line = document.createElement("div");
+      line.className = "feed-line";
+      const cueSpan = document.createElement("span");
+      cueSpan.className = "feed-line-preview";
+      cueSpan.textContent = cue;
+      line.appendChild(cueSpan);
+
+      const meta = document.createElement("div");
+      meta.className = "feed-meta";
+
+      const tag = document.createElement("span");
+      tag.className = "feed-tag";
+      tag.textContent = "Cue line · Human + AI";
+
+      const spanMeta = document.createElement("span");
+      spanMeta.textContent = `${scene.tone} · 2 chars · ${scene.dialogue.length} lines`;
+
+      meta.appendChild(tag);
+      meta.appendChild(spanMeta);
+      item.appendChild(line);
+      item.appendChild(meta);
+
+      item.addEventListener("click", () => {
+        showFullScene(scene);
+      });
+
+      feedScroll.appendChild(item);
+      scrollFeedToBottom();
+    }
+
+    function showFullScene(scene) {
+      fullSceneTitle.textContent = `Scene #${scene.id} · ${scene.tone} tone`;
+      fullSceneMeta.textContent =
+        `Character 1: ${scene.character1Name} · Character 2: ${scene.character2Name}`;
+      fullSceneLines.innerHTML = "";
+      fullSceneEmpty.style.display = "none";
+
+      scene.dialogue.forEach((line) => {
+        const li = document.createElement("li");
+        const strong = document.createElement("strong");
+        strong.textContent = `${line.character}: `;
+        const span = document.createElement("span");
+        span.className = line.origin === "human" ? "human" : "ai";
+        span.textContent = line.text;
+        li.appendChild(strong);
+        li.appendChild(span);
+        fullSceneLines.appendChild(li);
+      });
+    }
+
+    // Form submit: build alternating dialogue
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const toneChip = document.querySelector('.option-chip[data-group="tone"].selected');
+      const char1Chip = document.querySelector('.option-chip[data-group="character1"].selected');
+      const char2Chip = document.querySelector('.option-chip[data-group="character2"].selected');
+      const humanLine = humanLineInput.value.trim();
+
+      if (!toneChip || !char1Chip || !char2Chip || !humanLine) {
+        alert("Pick a tone, choose Character 1 and Character 2, and give Character 1 one line of dialogue.");
+        return;
+      }
+
+      const tone = toneChip.dataset.value;
+      const character1Name = char1Chip.dataset.value;
+      const character2Name = char2Chip.dataset.value;
+
+      generateBtn.disabled = true;
+      generateBtn.textContent = "Generating…";
+
+      const aiLines = generateAICompletion({
+        tone,
+        character1Name,
+        character2Name,
+        humanLine
+      });
+
+      const dialogue = [];
+
+      // Line 1: Character 1 (human)
+      dialogue.push({
+        character: "Character 1",
+        origin: "human",
+        text: humanLine
+      });
+
+      // Next lines: alternate speakers, all AI-origin
+      let isNextChar2 = true; // line 2 starts as Character 2 (AI)
+      aiLines.forEach((text) => {
+        const speaker = isNextChar2 ? "Character 2" : "Character 1";
+        const cleanedText = text
+          .replace(/^Character\s*1:\s*/i, "")
+          .replace(/^Character\s*2:\s*/i, "")
+          .replace(new RegExp("^" + character1Name + ":\\s*", "i"), "")
+          .replace(new RegExp("^" + character2Name + ":\\s*", "i"), "")
+          .trim();
+
+        dialogue.push({
+          character: speaker,
+          origin: "ai",
+          text: cleanedText || text
+        });
+
+        isNextChar2 = !isNextChar2;
+      });
+
+      renderSceneLines(dialogue);
+      sceneOutput.style.display = "block";
+
+      const scene = {
+        id: scenes.length + 1,
+        tone,
+        character1Name,
+        character2Name,
+        dialogue
+      };
+
+      addSceneToFeed(scene);
+      showFullScene(scene);
+
+      generateBtn.disabled = false;
+      generateBtn.textContent = "Generate dialogue";
+    });
+
+    clearBtn.addEventListener("click", () => {
+      humanLineInput.value = "";
+      sceneOutput.style.display = "none";
+      sceneLinesEl.innerHTML = "";
+      document
+        .querySelectorAll(".option-chip.selected")
+        .forEach((chip) => chip.classList.remove("selected"));
+    });
+
+    // Fullscreen toggle for feed container (click still works inside fullscreen)
+    function toggleFullscreen() {
+      const elem = feedContainer;
+      if (!document.fullscreenElement) {
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+          elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+          elem.msRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      }
+    }
+
+    fullscreenBtn.addEventListener("click", toggleFullscreen);
+
+    // Seed feed with one demo scene so the right side isn't empty
+    window.addEventListener("load", () => {
+      const demoScene = {
+        id: 1,
+        tone: "bittersweet",
+        character1Name: "Stage manager who hides their panic",
+        character2Name: "Usher convinced the show never ends",
+        dialogue: [
+          {
+            character: "Character 1",
+            origin: "human",
+            text: "If I never call the last cue, maybe tonight can’t be over."
+          },
+          {
+            character: "Character 2",
+            origin: "ai",
+            text: "You say that every night, and every night the lights still come up."
+          },
+          {
+            character: "Character 1",
+            origin: "ai",
+            text: "Then help me stall them. Trip over a row or something."
+          },
+          {
+            character: "Character 2",
+            origin: "ai",
+            text: "I already did. They thought it was part of the choreography."
+          }
+        ]
+      };
+      addSceneToFeed(demoScene);
+    });
+  </script>
+</body>
+</html>
